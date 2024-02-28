@@ -4,12 +4,11 @@ import json
 estudiantes = [
     {
         "id": 1,
-        "nombre": "Pedrito",
+        "nombre": "Alvaro",
         "apellido": "García",
         "carrera": "Ingeniería de Sistemas",
     },
 ]
-
 
 class RESTRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -19,11 +18,10 @@ class RESTRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps(estudiantes).encode("utf-8"))
             
-        elif self.path.startswith("/buscar_estudiante_inicial/"):
+        elif self.path.startswith("/buscar_nombre/"):
             inicial =self.path.split("/")[-1]
-            
             estudiante = next(
-                (estudiante for estudiante in estudiantes if (estudiante["id"])[0] ==inicial),
+                (estudiante["nombre"] for estudiante in estudiantes if (estudiante["nombre"])[0]==inicial),
                 None,
             )
             if estudiante:
@@ -31,23 +29,22 @@ class RESTRequestHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-type", "application/json")
                 self.end_headers()
                 self.wfile.write(json.dumps(estudiante).encode("utf-8"))
+                
         elif self.path.startswith("/contar_carreras/"):
             carrera =self.path.split("/")[-1]
-            cant_estudiantes = next(
-                (sum(1 for estudiante in estudiantes if estudiante["carrera"]==carrera)),
-                None,
-            )
-            if cant_estudiantes:
-                self.send_response(200)
-                self.send_header("Content-type", "application/json")
-                self.end_headers()
-                self.wfile.write(json.dumps(cant_estudiantes).encode("utf-8"))
-        elif self.path=="/total_estudiantes":
-            total_estudiantes=len(estudiantes)
+            cant_estudiantes =sum(1 for estudiante in estudiantes if estudiante["carrera"]==carrera)
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps(total_estudiantes).encode("utf-8"))
+            self.wfile.write(json.dumps(cant_estudiantes).encode("utf-8"))
+                 
+        elif self.path=="/total_estudiantes":
+            cant_estudiantes =sum(1 for estudiante in estudiantes)
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(cant_estudiantes).encode("utf-8"))
+   
         else:
             self.send_response(404)
             self.send_header("Content-type", "application/json")
@@ -65,7 +62,7 @@ class RESTRequestHandler(BaseHTTPRequestHandler):
             self.send_header("Content-type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps(estudiantes).encode("utf-8"))
-       
+
         else:
             self.send_response(404)
             self.send_header("Content-type", "application/json")
